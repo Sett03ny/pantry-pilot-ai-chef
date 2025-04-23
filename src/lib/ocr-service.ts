@@ -17,10 +17,15 @@ export async function performOCR(imageData: string): Promise<OCRResult> {
   // This is a mock function that simulates OCR processing
   // In a real app, this would call an OCR API or use a library like Tesseract.js
   
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  console.log("Starting OCR process with image data...");
   
-  // Return mock data
+  // Simulate processing time with random delay to mimic real-world OCR processing
+  const processingTime = Math.random() * 1000 + 1000; // 1-2 seconds
+  await new Promise(resolve => setTimeout(resolve, processingTime));
+  
+  console.log(`OCR processing completed in ${processingTime.toFixed(0)}ms`);
+  
+  // Return mock data - in a real app this would be extracted from the image
   return {
     items: [
       { name: 'Milk', price: 3.99, quantity: 1 },

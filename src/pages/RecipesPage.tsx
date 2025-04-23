@@ -15,60 +15,17 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface Recipe {
-  id: string;
-  name: string;
-  ingredients: string[];
-  matchedIngredients: number;
-  totalIngredients: number;
-  cookTime: number;
-  imageUrl: string;
-}
+import { recipeDatabase } from "@/lib/food-data";
 
 export default function RecipesPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Mock data for recipes
-  const mockRecipes: Recipe[] = [
-    {
-      id: '1',
-      name: 'Vegetable Stir Fry',
-      ingredients: ['broccoli', 'carrots', 'bell pepper', 'garlic', 'soy sauce'],
-      matchedIngredients: 4,
-      totalIngredients: 5,
-      cookTime: 20,
-      imageUrl: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=200&h=150',
-    },
-    {
-      id: '2',
-      name: 'Chicken Alfredo Pasta',
-      ingredients: ['chicken breast', 'pasta', 'cream', 'parmesan cheese', 'garlic'],
-      matchedIngredients: 3,
-      totalIngredients: 5,
-      cookTime: 30,
-      imageUrl: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=200&h=150',
-    },
-    {
-      id: '3',
-      name: 'Veggie Omelette',
-      ingredients: ['eggs', 'bell pepper', 'onion', 'cheese', 'spinach'],
-      matchedIngredients: 5,
-      totalIngredients: 5,
-      cookTime: 15,
-      imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=200&h=150',
-    },
-    {
-      id: '4',
-      name: 'Apple Cinnamon Oatmeal',
-      ingredients: ['oats', 'apples', 'cinnamon', 'maple syrup', 'milk'],
-      matchedIngredients: 2,
-      totalIngredients: 5,
-      cookTime: 10,
-      imageUrl: 'https://images.unsplash.com/photo-1635921191443-21a68f60e8ad?auto=format&fit=crop&w=200&h=150',
-    },
-  ];
+  // Filter recipes based on search query
+  const filteredRecipes = recipeDatabase.filter(recipe => 
+    recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipe.ingredients.some(ing => ing.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <MobileLayout title="Recipe Suggestions">
@@ -96,12 +53,12 @@ export default function RecipesPage() {
         </div>
         
         <div className="space-y-4">
-          {mockRecipes.map((recipe) => (
+          {filteredRecipes.map((recipe) => (
             <Card key={recipe.id} className="overflow-hidden">
               <div className="flex">
                 <div className="w-1/3">
                   <img 
-                    src={recipe.imageUrl} 
+                    src={recipe.imageUrl || "https://images.unsplash.com/photo-1635921191443-21a68f60e8ad?auto=format&fit=crop&w=200&h=150"} 
                     alt={recipe.name}
                     className="h-full w-full object-cover"
                   />
@@ -119,19 +76,21 @@ export default function RecipesPage() {
                         
                         <Utensils className="h-3 w-3 mr-1" />
                         <span>
-                          {recipe.matchedIngredients}/{recipe.totalIngredients} ingredients
+                          {recipe.matchedIngredients !== undefined ? 
+                            `${recipe.matchedIngredients}/${recipe.ingredients.length}` : 
+                            `${recipe.ingredients.length}`} ingredients
                         </span>
                       </div>
                     </div>
                     
                     <div className="mt-2 flex items-center justify-between">
                       <Badge 
-                        variant={recipe.matchedIngredients === recipe.totalIngredients ? "default" : "outline"}
-                        className={recipe.matchedIngredients === recipe.totalIngredients ? "bg-green-500" : ""}
+                        variant={recipe.matchedIngredients === recipe.ingredients.length ? "default" : "outline"}
+                        className={recipe.matchedIngredients === recipe.ingredients.length ? "bg-green-500" : ""}
                       >
-                        {recipe.matchedIngredients === recipe.totalIngredients 
+                        {recipe.matchedIngredients === recipe.ingredients.length 
                           ? "Ready to Cook" 
-                          : `Missing ${recipe.totalIngredients - recipe.matchedIngredients}`
+                          : `Missing ${recipe.ingredients.length - (recipe.matchedIngredients || 0)}`
                         }
                       </Badge>
                       <Button variant="secondary" size="sm" onClick={() => navigate(`/recipes/${recipe.id}`)}>View</Button>

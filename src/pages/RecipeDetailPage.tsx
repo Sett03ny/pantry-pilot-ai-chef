@@ -3,15 +3,17 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MobileLayout } from "@/components/mobile-layout/MobileLayout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Clock, Users, ChevronDown, ChevronUp, Bookmark } from "lucide-react";
 import { recipeDatabase, Recipe } from "@/lib/food-data";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
 
 export default function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   
   useEffect(() => {
     if (id) {
@@ -24,6 +26,24 @@ export default function RecipeDetailPage() {
       }
     }
   }, [id, navigate]);
+  
+  const handleSaveRecipe = () => {
+    setIsSaved(!isSaved);
+    toast({
+      title: isSaved ? "Recipe removed" : "Recipe saved",
+      description: isSaved ? "This recipe has been removed from your saved recipes." : "This recipe has been saved to your collection.",
+    });
+  };
+  
+  const handleStartCooking = () => {
+    toast({
+      title: "Let's start cooking!",
+      description: "Recipe instructions are ready to follow.",
+    });
+    // Scroll to instructions
+    setShowInstructions(true);
+    document.getElementById('instructions')?.scrollIntoView({ behavior: 'smooth' });
+  };
   
   if (!recipe) {
     return (
@@ -82,7 +102,7 @@ export default function RecipeDetailPage() {
           <Separator className="my-6" />
           
           {/* Instructions */}
-          <div>
+          <div id="instructions">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setShowInstructions(!showInstructions)}
@@ -108,8 +128,15 @@ export default function RecipeDetailPage() {
           {/* Action buttons */}
           <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t">
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1">Save Recipe</Button>
-              <Button className="flex-1">Start Cooking</Button>
+              <Button 
+                variant={isSaved ? "default" : "outline"} 
+                className={`flex-1 ${isSaved ? "bg-green-500" : ""}`}
+                onClick={handleSaveRecipe}
+              >
+                <Bookmark className={`mr-2 h-4 w-4 ${isSaved ? "fill-white" : ""}`} />
+                {isSaved ? "Saved" : "Save Recipe"}
+              </Button>
+              <Button className="flex-1" onClick={handleStartCooking}>Start Cooking</Button>
             </div>
           </div>
         </div>
